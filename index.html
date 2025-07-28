@@ -1,0 +1,529 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+	<meta name="viewport" content="user-scalable=yes width=device-width" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>실시간 열차 위치</title>
+</head>
+
+<style>
+html {
+	font-size: 20px;
+    font-family: NanumBarunGothicLight;
+}
+body {
+	margin: 0px;
+}
+div.title {
+    position: fixed;
+	padding: 8px;
+	top: 0;
+	width: 100%;
+    z-index: 4;
+	font-size: 1.rem;
+	font-weight: bold;
+	color: #FFF;
+	background-color: #000;
+	display: flex;
+	align-items: center;
+    box-shadow: 0px 4px 5px 0px rgba(0, 0, 0, 0.3);
+}
+div.title > i {
+	padding: 8px;
+}
+div.title > span {
+	padding: 8px;
+}
+div.drawer {
+    position: fixed;
+	top: 0;
+    margin: 0px;
+    background: #EEE;
+    height: 100%;
+    width: 0px;
+    position: fixed;
+    transition: 0.3s;
+    overflow-x: hidden;
+    box-shadow: 0px 20px 20px 0px rgba(0, 0, 0, 0.4);
+    z-index: 3;
+    white-space: nowrap;
+	font-size: 1.1rem;
+}
+div.drawer > div {
+	padding-top: 54px;
+}
+div.menu {
+	padding: 4px;
+}
+div.submenu {
+	padding: 0px 12px;
+}
+div.menu_item {
+	padding: 4px;
+	font-size: 1rem;
+}
+
+div.body_outer {
+	margin: 54px auto 0px;
+	padding: 16px;
+	max-width: 768px;
+}
+div.body {
+	padding: 16px;
+}
+
+line, polyline, polygon {
+    stroke-width: 5px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+circle {
+    fill: #FFF;
+    stroke: #000;
+    stroke-width: 2;
+}
+text.stn {
+    text-anchor: middle;
+	font-size: 36px;
+    font-family: NanumBarunGothic;
+}
+
+div.footer {
+	padding: 8px;
+    font-size: 0.8rem;
+    text-align: center;
+}
+</style>
+
+<body>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-barun-gothic.css" rel="stylesheet">
+	
+	<!-- title -->
+    <div class='title'>
+		<i class="material-icons" id='icon' onclick="openOrClose();">&#xE5D2;</i><span id='title_text'>실시간 전철 위치</span>
+	</div>
+	
+	<!-- drawer -->
+	<div class='drawer' id='drawer'>
+		
+	</div>
+	
+	<!-- body -->
+    <div class='body_outer'>
+		<div class='body'>
+			<div id='metro_map'>
+				아직 작동하지 않아요
+			</div>
+		</div>
+	</div>
+	
+	<!-- footer -->
+    <div class='footer'>
+		<hr>
+		© 2018-2025 SinZ, All rights reserved.
+	</div>
+	
+	<script>
+function loadData(lineId) {
+    var mid = 'sinz'; //크롤러들이 백엔드 요청 주소를 찾지 못하도록 하는 뻘짓
+    var end = 'me';
+    var url = 'htt'+'ps://' + 'api.' + mid + '.' + end;
+	fetch(url + '/met'+'ro?lineId=' + lineId)
+		.then((response) => response.json())
+		.then((data) => {
+			applyData(data, lineId);
+			closeDrawer();
+		});
+}
+
+function applyData(data, lineId) {
+	document.getElementById('title_text').innerHTML = data.name + ' 열차 위치 (' + (data.isTimeTable?'시간표':'실시간') + ')';
+	var src;
+	if (lineId == 101) {
+		src = drawLine1(data);
+	}
+	else {
+		src = drawLine(data, lineId);
+	}
+	document.getElementById('metro_map').innerHTML = src;
+}
+
+function drawLine1(data) {
+	var m = 100;
+	var height = m * data.data.length - 10;
+	var src = '<svg viewbox="0 -50 800 8400" >';
+	src += '<line x1="50" y1="-20" x2="50" y2="6520" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="-20" x2="750" y2="8320" stroke="' + data.color + '" />';
+
+    src += '<polyline points="50,4450 100,4500 400,4500 450,4550 450,6550 400,6600 100,6600 50,6650 50,8320" fill="none" stroke="'+data.color+'" />';
+    src += '<polyline points="750,4450 700,4500 400,4500 350,4550 350,6520" fill="none" stroke="'+data.color+'" />';
+    
+    src += '<polyline points="450,4800 500,4850 500,4920" fill="none" stroke="'+data.color+'" />';
+    src += '<polyline points="750,4800 700,4850 700,4920" fill="none" stroke="'+data.color+'" />';
+    
+    src += '<polyline points="450,6200 500,6250 500,6320" fill="none" stroke="'+data.color+'" />';
+    src += '<polyline points="750,6200 700,6250 700,6320" fill="none" stroke="'+data.color+'" />';
+    
+
+    data = data.data;
+    //연천 ~ 구로
+    for(var n=0;n<45;n++){
+        src += station(400, m*n, data[n]);
+        src += metro_up(50, m*n, data[n].up);
+        src += metro_dn(750, m*n, data[n].down);
+    }
+    //가산디지털단지 ~ 금천구청
+    for(var n=45;n<48;n++){
+        src += stationR(600, m*n + 100, data[n]);
+        src += metro_up(450, m*n + 100, data[n].up);
+        src += metro_dn(750, m*n + 100, data[n].down);
+    }
+    n = 100;
+    src += stationR1(600, 4900, data[n]);
+    src += metro_up(450, 4900, data[n].up);
+    src += metro_dn(750, 4900, data[n].down);
+    //석수 ~ 병점
+    for(var n=48;n<61;n++){
+        src += stationR(600, m*n + 200, data[n]);
+        src += metro_up(450, m*n + 200, data[n].up);
+        src += metro_dn(750, m*n + 200, data[n].down);
+    }
+    n = 101;
+    src += stationR1(600, 6300, data[n]);
+    src += metro_up(450, 6300, data[n].up);
+    src += metro_dn(750, 6300, data[n].down);
+    //세마 ~ 오산대
+    for(var n=61;n<63;n++){
+        src += stationR(600, m*n + 300, data[n]);
+        src += metro_up(450, m*n + 300, data[n].up);
+        src += metro_dn(750, m*n + 300, data[n].down);
+    }
+    //오산 ~ 신창
+    for(var n=63;n<80;n++){
+        src += station(400, m*n + 400, data[n]);
+        src += metro_up(50, m*n + 400, data[n].up);
+        src += metro_dn(750, m*n + 400, data[n].down);
+    }
+
+    //구일 ~ 인천
+    for(var n=80;n<100;n++){
+        src += stationL(200, m*(n-35) + 100, data[n]);
+        src += metro_up(50, m*(n-35) + 100, data[n].up);
+        src += metro_dn(350, m*(n-35) + 100, data[n].down);
+    }
+
+    return src;
+}
+
+function drawLine(data, lineId) {
+	var m = 100;
+	var height = m * data.data.length - 10;
+	var src = '<svg viewbox="0 0 800 ' + (height + 10) + '" >';
+	src += '<line x1="50" y1="10" x2="50" y2="' + height + '" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="10" x2="750" y2="' + height + '" stroke="' + data.color + '" />';
+    if ([102, 103, 107, 108, 109, 125, 126, 127, 130, 131, 151, 152,
+            201, 202, 203, 204, 301, 401, 402, 403, 501].includes(lineId)) data.data.forEach((e, i) => {
+		src += station(400, m*i + 50, e);
+		src += metro_up(750, m*i + 50, e.up);
+		src += metro_dn(50, m*i + 50, e.down);
+	});
+    else data.data.forEach((e, i) => {
+		src += station(400, m*i + 50, e);
+		src += metro_up(50, m*i + 50, e.up);
+		src += metro_dn(750, m*i + 50, e.down);
+	});
+    
+	src += '</svg>';
+	return src;
+}
+
+function station(x, y, data, noCircle){
+    var cx = x + 0;
+    var cy = y - 10 + 10;
+    var circle = '<circle cx="'+(cx-350)+'" cy="'+cy+'" r="9"/><circle cx="'+(cx+350)+'" cy="'+cy+'" r="9"/>';
+    if (noCircle) {
+        circle = '';
+        if(noCircle.left) circle += '<circle cx="'+(cx)+'" cy="'+cy+'" r="9"/>';
+        if(noCircle.right) circle += '<circle cx="'+(cx)+'" cy="'+cy+'" r="9"/>';
+    }
+	var json = JSON.stringify(data);
+	return '<line x1="50" y1="'+cy+'" x2="150" y2="' + cy + '" stroke="#EEE" />' + 
+        '<line x1="650" y1="'+cy+'" x2="750" y2="' + cy + '" stroke="#EEE" />' + 
+        '<text class="stn" x='+x+' y='+(y+12)+' fill=#000 onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
+        + circle;
+}
+
+function stationL(x, y, data, noCircle){
+    var cx = x + 0;
+    var cy = y - 10 + 10;
+    var circle = '<circle cx="'+(cx-150)+'" cy="'+cy+'" r="9"/>' + 
+        '<circle cx="'+(cx+150)+'" cy="'+cy+'" r="9"/>';
+	var json = JSON.stringify(data);
+	return '<line x1="50" y1="'+cy+'" x2="100" y2="' + cy + '" stroke="#EEE" />' + 
+        '<line x1="300" y1="'+cy+'" x2="350" y2="' + cy + '" stroke="#EEE" />' + 
+        '<text class="stn" x='+x+' y='+(y+12)+' fill=#000 onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
+        + circle;
+}
+
+function stationR(x, y, data, noCircle){
+    var cx = x + 0;
+    var cy = y - 10 + 10;
+    var circle = '<circle cx="'+(cx-150)+'" cy="'+cy+'" r="9"/>' + 
+        '<circle cx="'+(cx+150)+'" cy="'+cy+'" r="9"/>';
+	var json = JSON.stringify(data);
+	return '<line x1="450" y1="'+cy+'" x2="500" y2="' + cy + '" stroke="#EEE" />' + 
+        '<line x1="700" y1="'+cy+'" x2="750" y2="' + cy + '" stroke="#EEE" />' + 
+        '<text class="stn" x='+x+' y='+(y+12)+' fill=#000 onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
+        + circle;
+}
+
+function stationR1(x, y, data, noCircle){
+    var cx = x + 0;
+    var cy = y - 10 + 10;
+    var circle = '<circle cx="'+(cx-100)+'" cy="'+cy+'" r="9"/>' + 
+        '<circle cx="'+(cx+100)+'" cy="'+cy+'" r="9"/>';
+	var json = JSON.stringify(data);
+	return '<line x1="500" y1="'+cy+'" x2="550" y2="' + cy + '" stroke="#EEE" />' + 
+        '<line x1="650" y1="'+cy+'" x2="700" y2="' + cy + '" stroke="#EEE" />' + 
+        '<text class="stn" x='+x+' y='+(y+12)+' fill=#000 onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
+        + circle;
+}
+
+
+function metro_up(x, y, data){
+if(data.length == 0) return '';
+x -= 14;
+y -= 24;
+var result = "";
+data.forEach((e, i) => { //열차 아이콘 배치
+var px = x, py = y;
+if (data.length > 1) {
+	if (i == 0) px -= 6;
+	else px += 6;
+}
+if (e.sts == '출발' || e.sts == '통과') py -= 30;
+if (e.sts == '접근' || e.sts == '진입') py += 30;
+var f = '';
+if (e.type > 0) f = '_e';
+if (e.name=='ITX-청춘') f = '_itx';
+if (e.name=='SRT') f = '_srt';
+if (e.name == '회송' || e.name == '화물' || e.name == '시운전') f = '_r';
+var file = "'./images/up" + f + ".svg'";
+result += "<image xlink:href=" + file + " x='" + px + "' y='" + py + "' width='28px'/>";
+});
+data.forEach((e, i) => { //행선지 글자 배치
+var px = x, py = y;
+if (data.length > 1) {
+	if (i == 0) px -= 6;
+	else px += 6;
+}
+if (e.sts == '출발' || e.sts == '통과') py -= 30;
+if (e.sts == '접근' || e.sts == '진입') py += 30;
+// result += '<text class=terminal x='+(px+8)+' y='+(py+28)+' transform="rotate(90,' + (px + 8) + ',' + (py + 28) + ')" fill=#E0E0E0>'+terminal(e.terminal, e.display)+'</text>';
+});
+return result;
+}
+
+function metro_dn(x, y, data){
+if(data.length == 0) return '';
+x -= 14;
+y -= 24;
+var result = "";
+data.forEach((e, i) => { //열차 아이콘 배치
+var px = x, py = y;
+if (data.length > 1) {
+	if (i == 0) px -= 6;
+	else px += 6;
+}
+if (e.sts == '출발' || e.sts == '통과') py += 30;
+if (e.sts == '접근' || e.sts == '진입') py -= 30;
+var f = '';
+if (e.type > 0) f = '_e';
+if (e.name=='ITX-청춘') f = '_itx';
+if (e.name=='SRT') f = '_srt';
+if (e.name == '회송' || e.name == '화물' || e.name == '시운전') f = '_r';
+var file = "'./images/down" + f + ".svg'";
+result += "<image xlink:href=" + file + " x='" + px + "' y='" + py + "' width='28px'/>";
+});
+data.forEach((e, i) => { //행선지 글자 배치
+var px = x, py = y;
+if (data.length > 1) {
+	if (i == 0) px -= 6;
+	else px += 6;
+}
+if (e.sts == '출발' || e.sts == '통과') py += 30;
+if (e.sts == '접근' || e.sts == '진입') py -= 30;
+// result += '<text class=terminal x='+(px+8)+' y='+(py+28)+' transform="rotate(90,' + (px + 8) + ',' + (py + 28) + ')" fill=#E0E0E0>'+terminal(e.terminal, e.display)+'</text>';
+});
+return result;
+}
+
+
+const LineList = [{
+    "name" : "수도권 전철",
+    "child" : true,
+    "data": [
+        {
+            "name" : "수도권 1호선",
+            "id" : "101"
+        }, {
+            "name" : "서울 2호선",
+            "id" : "102"
+        }, {
+            "name" : "수도권 3호선",
+            "id" : "103"
+        }, {
+            "name" : "수도권 4호선",
+            "id" : "104"
+        }, {
+            "name" : "수도권 5호선",
+            "id" : "105"
+        }, {
+            "name" : "서울 6호선",
+            "id" : "106"
+        }, {
+            "name" : "서울 7호선",
+            "id" : "107"
+        }, {
+            "name" : "수도권 8호선",
+            "id" : "108"
+        }, {
+            "name" : "서울 9호선",
+            "id" : "109"
+        }, {
+            "name" : "경의·중앙선",
+            "id" : "121"
+        }, {
+            "name" : "수인·분당선",
+            "id" : "122"
+        }, {
+            "name" : "신분당선",
+            "id" : "123"
+        }, {
+            "name" : "경춘선",
+            "id" : "124"
+        }, {
+            "name" : "우이신설선",
+            "id" : "125"
+        }, {
+            "name" : "용인경전철",
+            "id" : "126"
+        }, {
+            "name" : "의정부경전철",
+            "id" : "127"
+        }, {
+            "name" : "경강선",
+            "id" : "128"
+        }, {
+            "name" : "서해선",
+            "id" : "129"
+        }, {
+            "name" : "김포골드라인",
+            "id" : "130"
+        }, {
+            "name" : "신림선",
+            "id" : "131"
+        }, {
+            "name" : "공항철도",
+            "id" : "132"
+        }, {
+            "name" : "인천 1호선",
+            "id" : "151"
+        }, {
+            "name" : "인천 2호선",
+            "id" : "152"
+        }, {
+            "name" : "GTX-A",
+            "id" : "190"
+        }
+    ]
+}, {
+    "name" : "동남권 광역전철",
+    "child" : true,
+    "data": [
+        {
+            "name" : "부산 1호선",
+            "id" : "201"
+        }, {
+            "name" : "부산 2호선",
+            "id" : "202"
+        }, {
+            "name" : "부산 3호선",
+            "id" : "203"
+        }, {
+            "name" : "부산 4호선",
+            "id" : "204"
+        }, {
+            "name" : "동해선",
+            "id" : "251"
+        }, {
+            "name" : "부산김해경전철",
+            "id" : "252"
+        }
+    ]
+}, {
+    "name" : "대전 도시철도",
+    "child" : false,
+    "data": ["301"]
+}, {
+    "name" : "대구권 전철",
+    "child" : true,
+    "data" : [
+        {
+            "name" : "대구 1호선",
+            "id" : "401"
+        }, {
+            "name" : "대구 2호선",
+            "id" : "402"
+        }, {
+            "name" : "대구 3호선",
+            "id" : "403"
+        }, {
+            "name" : "대경선",
+            "id" : "451"
+        }
+    ]
+}, {
+    "name" : "광주 도시철도",
+    "child" : false,
+    "data": ["501"]
+}];
+(function(){
+var src = '<div>';
+LineList.forEach((e, i) => {
+	src += '<div class=\'menu\'>';
+	if (e.child) {
+		src += '<div class=\'menu_title\' onclick="expandMenu(this)">' + e.name + '</div>';
+		src += '<div class=\'submenu\'>';
+		for(var n=0;n<e.data.length;n++) {
+			src += '<div class=menu_item onclick="loadData(\'' + e.data[n].id + '\');"> - ' + e.data[n].name + '</div>';
+		}
+		src += '</div>';
+	} else {
+		src += '<div class=\'menu_title\' onclick="loadData(\'' + e.data[0] + '\')">' + e.name + '</div>';
+	}
+	src += '</div>';
+});
+document.getElementById("drawer").innerHTML = src + '</div>';
+})();
+
+var isOpened = false;
+function openOrClose(btn){
+	isOpened ? closeDrawer() : openDrawer();
+}
+
+function openDrawer() {
+	document.getElementById("drawer").style.width = "73%";
+	isOpened = true;
+}
+
+function closeDrawer() {
+	document.getElementById("drawer").style.width = "0";
+	isOpened = false;
+}
+</script>
+</body>
+
+</html>

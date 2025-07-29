@@ -155,7 +155,6 @@ function applyData(data, lineId) {
 
 function drawLine1(data) {
 	var m = 100;
-	var height = m * data.data.length - 10;
 	var src = '<svg viewbox="0 -50 800 8400" >';
 	src += '<line x1="50" y1="-20" x2="50" y2="6520" stroke="' + data.color + '" />';
 	src += '<line x1="750" y1="-20" x2="750" y2="8320" stroke="' + data.color + '" />';
@@ -221,7 +220,6 @@ function drawLine1(data) {
 
 function drawLine2(data) {
 	var m = 100;
-	var height = m * data.data.length - 10;
 	var src = '<svg viewbox="0 -150 800 2900" >';
     
     src += '<polygon points="100,-50 125,-75 675,-75 700,-50 700,2150 675,2175 125,2175 100,2150" fill="none" stroke="'+data.color+'" />';

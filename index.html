@@ -141,6 +141,7 @@ function loadData(lineId) {
 function applyData(data, lineId) {
 	document.getElementById('title_text').innerHTML = data.name + ' 열차 위치 (' + (data.isTimeTable?'시간표':'실시간') + ')';
 	var src;
+    if (!isNaN(Number(lineId))) lineId = Number(lineId);
 	if (lineId == 101) {
 		src = drawLine1(data);
 	}
@@ -263,20 +264,20 @@ function drawLine2(data) {
 
 function drawLine(data, lineId) {
 	var m = 100;
-	var height = m * data.data.length - 10;
-	var src = '<svg viewbox="0 0 800 ' + (height + 10) + '" >';
-	src += '<line x1="50" y1="10" x2="50" y2="' + height + '" stroke="' + data.color + '" />';
-	src += '<line x1="750" y1="10" x2="750" y2="' + height + '" stroke="' + data.color + '" />';
+	var height = m * data.data.length;
+	var src = '<svg viewbox="0 -50 800 ' + height + '" >';
+	src += '<line x1="50" y1="-20" x2="50" y2="' + (height-80) + '" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="-20" x2="750" y2="' + (height-80) + '" stroke="' + data.color + '" />';
     if ([102, 103, 107, 108, 109, 125, 126, 127, 130, 131, 151, 152,
             201, 202, 203, 204, 301, 401, 402, 403, 501].includes(lineId)) data.data.forEach((e, i) => {
-		src += station(400, m*i + 50, e);
-		src += metro_up(750, m*i + 50, e.up);
-		src += metro_dn(50, m*i + 50, e.down);
+		src += station(400, m*i, e);
+		src += metro_up(750, m*i, e.up);
+		src += metro_dn(50, m*i, e.down);
 	});
     else data.data.forEach((e, i) => {
-		src += station(400, m*i + 50, e);
-		src += metro_up(50, m*i + 50, e.up);
-		src += metro_dn(750, m*i + 50, e.down);
+		src += station(400, m*i, e);
+		src += metro_up(50, m*i, e.up);
+		src += metro_dn(750, m*i, e.down);
 	});
     
 	src += '</svg>';

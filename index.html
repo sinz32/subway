@@ -144,6 +144,9 @@ function applyData(data, lineId) {
 	if (lineId == 101) {
 		src = drawLine1(data);
 	}
+	else if (lineId == 102) {
+		src = drawLine2(data);
+	}
 	else {
 		src = drawLine(data, lineId);
 	}
@@ -165,7 +168,6 @@ function drawLine1(data) {
     
     src += '<polyline points="450,6200 500,6250 500,6320" fill="none" stroke="'+data.color+'" />';
     src += '<polyline points="750,6200 700,6250 700,6320" fill="none" stroke="'+data.color+'" />';
-    
 
     data = data.data;
     //연천 ~ 구로
@@ -217,6 +219,50 @@ function drawLine1(data) {
     return src;
 }
 
+function drawLine2(data) {
+	var m = 100;
+	var height = m * data.data.length - 10;
+	var src = '<svg viewbox="0 -150 800 2900" >';
+    
+    src += '<polygon points="100,-50 125,-75 675,-75 700,-50 700,2150 675,2175 125,2175 100,2150" fill="none" stroke="'+data.color+'" />';
+    src += '<polygon points="50,-50 100,-100 700,-100 750,-50 750,2150 700,2200 100,2200 50,2150" fill="none" stroke="'+data.color+'" />';
+    
+	src += '<line x1="50" y1="2280" x2="50" y2="2720" stroke="' + data.color + '" />';
+	src += '<line x1="350" y1="2280" x2="350" y2="2720" stroke="' + data.color + '" />';
+	src += '<line x1="450" y1="2280" x2="450" y2="2720" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="2280" x2="750" y2="2720" stroke="' + data.color + '" />';
+
+    data = data.data;
+    data[0].stn += ' (본선)';
+    data[23].stn += ' (본선)';
+    data[29].stn += ' (지하)';
+    //을지로순환선
+    for(var n=0;n<22;n++){
+        src += stationR2(650, m*n, data[n]);
+        src += metro_up(750, m*n, data[n].up);
+        src += metro_dn(700, m*n, data[n].down);
+    }
+    for(var n=22;n<43;n++){
+        src += stationL2(150, m*(42-n) + 0, data[n]);
+        src += metro_up(100, m*(42-n) + 0, data[n].down);
+        src += metro_dn(50, m*(42-n) + 0, data[n].up);
+    }
+    //성수지선
+    for(var n=43;n<48;n++){
+        src += stationL(200, m*(n-22) + 200, data[n]);
+        src += metro_up(350, m*(n-22) + 200, data[n].up);
+        src += metro_dn(50, m*(n-22) + 200, data[n].down);
+    }
+    //신정지선
+    for(var n=48;n<53;n++){
+        src += stationR(600, m*(n-27) + 200, data[n]);
+        src += metro_up(750, m*(n-27) + 200, data[n].up);
+        src += metro_dn(450, m*(n-27) + 200, data[n].down);
+    }
+
+    return src;
+}
+
 function drawLine(data, lineId) {
 	var m = 100;
 	var height = m * data.data.length - 10;
@@ -241,7 +287,7 @@ function drawLine(data, lineId) {
 
 function station(x, y, data, noCircle){
     var cx = x + 0;
-    var cy = y - 10 + 10;
+    var cy = y;
     var circle = '<circle cx="'+(cx-350)+'" cy="'+cy+'" r="9"/><circle cx="'+(cx+350)+'" cy="'+cy+'" r="9"/>';
     if (noCircle) {
         circle = '';
@@ -257,7 +303,7 @@ function station(x, y, data, noCircle){
 
 function stationL(x, y, data, noCircle){
     var cx = x + 0;
-    var cy = y - 10 + 10;
+    var cy = y;
     var circle = '<circle cx="'+(cx-150)+'" cy="'+cy+'" r="9"/>' + 
         '<circle cx="'+(cx+150)+'" cy="'+cy+'" r="9"/>';
 	var json = JSON.stringify(data);
@@ -269,7 +315,7 @@ function stationL(x, y, data, noCircle){
 
 function stationR(x, y, data, noCircle){
     var cx = x + 0;
-    var cy = y - 10 + 10;
+    var cy = y;
     var circle = '<circle cx="'+(cx-150)+'" cy="'+cy+'" r="9"/>' + 
         '<circle cx="'+(cx+150)+'" cy="'+cy+'" r="9"/>';
 	var json = JSON.stringify(data);
@@ -281,13 +327,31 @@ function stationR(x, y, data, noCircle){
 
 function stationR1(x, y, data, noCircle){
     var cx = x + 0;
-    var cy = y - 10 + 10;
+    var cy = y;
     var circle = '<circle cx="'+(cx-100)+'" cy="'+cy+'" r="9"/>' + 
         '<circle cx="'+(cx+100)+'" cy="'+cy+'" r="9"/>';
 	var json = JSON.stringify(data);
 	return '<line x1="500" y1="'+cy+'" x2="550" y2="' + cy + '" stroke="#EEE" />' + 
         '<line x1="650" y1="'+cy+'" x2="700" y2="' + cy + '" stroke="#EEE" />' + 
         '<text class="stn" x='+x+' y='+(y+12)+' fill=#000 onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
+        + circle;
+}
+
+function stationL2(x, y, data){
+    var circle = '<circle cx="'+(x-100)+'" cy="'+y+'" r="9"/>' + 
+        '<circle cx="'+(x-50)+'" cy="'+y+'" r="9"/>';
+	var json = JSON.stringify(data);
+	return '<line x1="'+(x-100)+'" y1="'+y+'" x2="'+(x-20)+'" y2="' + y + '" stroke="#EEE" />' +
+        '<text class="stn" style=\'text-anchor: start;\'; x='+x+' y='+(y+12)+' fill=#000 onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
+        + circle;
+}
+
+function stationR2(x, y, data){
+    var circle = '<circle cx="'+(x+50)+'" cy="'+y+'" r="9"/>' + 
+        '<circle cx="'+(x+100)+'" cy="'+y+'" r="9"/>';
+	var json = JSON.stringify(data);
+	return '<line x1="'+(x+100)+'" y1="'+y+'" x2="'+(x+20)+'" y2="' + y + '" stroke="#EEE" />' + 
+        '<text class="stn" style=\'text-anchor: end;\'; x='+x+' y='+(y+12)+' fill=#000 onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
         + circle;
 }
 

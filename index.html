@@ -148,6 +148,9 @@ function applyData(data, lineId) {
 	else if (lineId == 102) {
 		src = drawLine2(data);
 	}
+	else if (lineId == 104) {
+		src = drawLine4(data);
+	}
 	else {
 		src = drawLine(data, lineId);
 	}
@@ -260,6 +263,29 @@ function drawLine2(data) {
     }
 
     return src;
+}
+
+function drawLine4(data, lineId) {
+	var m = 100;
+	var height = m * data.data.length + 1;
+	var src = '<svg viewbox="0 -50 800 ' + height + '" >';
+    src += '<polyline points="50,-20 50,2830 750,2970 750,' + (height-80) + '" fill="none" stroke="'+data.color+'" />';
+    src += '<polyline points="750,-20 750,2830 50,2970 50,' + (height-80) + '" fill="none" stroke="'+data.color+'" />';
+    
+    data = data.data;
+    for(var n=0;n<29;n++){
+        src += station(400, m*n, data[n]);
+        src += metro_up(750, m*n, data[n].up);
+        src += metro_dn(50, m*n, data[n].down);
+    }
+    for(var n=29;n<data.length;n++){
+        src += station(400, m*n + 100, data[n]);
+        src += metro_up(50, m*n + 100, data[n].up);
+        src += metro_dn(750, m*n + 100, data[n].down);
+    }
+    
+	src += '</svg>';
+	return src;
 }
 
 function drawLine(data, lineId) {

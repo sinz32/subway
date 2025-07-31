@@ -151,6 +151,12 @@ function applyData(data, lineId) {
 	else if (lineId == 104) {
 		src = drawLine4(data);
 	}
+	else if (lineId == 105) {
+		src = drawLine5(data);
+	}
+	else if (lineId == 106) {
+		src = drawLine6(data);
+	}
 	else {
 		src = drawLine(data, lineId);
 	}
@@ -265,7 +271,7 @@ function drawLine2(data) {
     return src;
 }
 
-function drawLine4(data, lineId) {
+function drawLine4(data) {
 	var m = 100;
 	var height = m * data.data.length + 1;
 	var src = '<svg viewbox="0 -50 800 ' + height + '" >';
@@ -284,6 +290,66 @@ function drawLine4(data, lineId) {
         src += metro_dn(750, m*n + 100, data[n].down);
     }
     
+	src += '</svg>';
+	return src;
+}
+
+function drawLine5(data) {
+	var m = 100;
+	var height = m * data.data.length;
+	var src = '<svg viewbox="0 -50 800 5000" >';
+	src += '<line x1="50" y1="-20" x2="50" y2="4620" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="-20" x2="750" y2="4920" stroke="' + data.color + '" />';
+    src += '<polyline points="50,3850 100,3900 400,3900 450,3950 450,4920" fill="none" stroke="'+data.color+'" />';
+    src += '<polyline points="750,3850 700,3900 400,3900 350,3950 350,4620" fill="none" stroke="'+data.color+'" />';
+    
+    data = data.data;
+    //방화 ~ 강동
+    for(var n=0;n<39;n++){
+        src += station(400, m*n, data[n]);
+        src += metro_up(750, m*n, data[n].up);
+        src += metro_dn(50, m*n, data[n].down);
+    }
+    //길동 ~ 하남검단산
+    for(var n=39;n<49;n++){
+        src += stationR(600, m*n + 100, data[n]);
+        src += metro_up(750, m*n + 100, data[n].up);
+        src += metro_dn(450, m*n + 100, data[n].down);
+    }
+    //둔촌동 ~ 마천
+    for(var n=49;n<56;n++){
+        src += stationL(200, m*(n-9), data[n]);
+        src += metro_up(350, m*(n-9), data[n].up);
+        src += metro_dn(50, m*(n-9), data[n].down);
+    }
+	src += '</svg>';
+	return src;
+}
+
+function drawLine6(data) {
+	var m = 100;
+	var height = m * data.data.length;
+	var src = '<svg viewbox="0 -80 800 3730" >';
+    src += '<polyline points="50,3620 50,-30 90,-70 710,-70 750,-30 750,3620" fill="none" stroke="'+data.color+'" />';
+
+
+    data = data.data;
+    src += stationR(600, 100, data[0], {right: true});
+    src += metro_up(750, 100, data[0].down);
+    //src += metro_dn(450, 100, data[0].up);
+    src += stationR(600, 0, data[1], {right: true});
+    src += metro_up(750, 0, data[1].down);
+    //src += metro_dn(450, 0, data[1].up);
+    for(var n=2;n<5;n++){
+        src += stationL(200, m*(n-2), data[n], {left: true});
+        //src += metro_up(350, m*(n-2), data[n].up);
+        src += metro_dn(50, m*(n-2), data[n].down);
+    }
+    for(var n=5;n<data.length;n++){
+        src += station(400, m*(n-2), data[n]);
+        src += metro_up(750, m*(n-2), data[n].up);
+        src += metro_dn(50, m*(n-2), data[n].down);
+    }
 	src += '</svg>';
 	return src;
 }
@@ -310,15 +376,10 @@ function drawLine(data, lineId) {
 	return src;
 }
 
-function station(x, y, data, noCircle){
+function station(x, y, data){
     var cx = x + 0;
     var cy = y;
     var circle = '<circle cx="'+(cx-350)+'" cy="'+cy+'" r="9"/><circle cx="'+(cx+350)+'" cy="'+cy+'" r="9"/>';
-    if (noCircle) {
-        circle = '';
-        if(noCircle.left) circle += '<circle cx="'+(cx)+'" cy="'+cy+'" r="9"/>';
-        if(noCircle.right) circle += '<circle cx="'+(cx)+'" cy="'+cy+'" r="9"/>';
-    }
 	var json = JSON.stringify(data);
 	return '<line x1="50" y1="'+cy+'" x2="150" y2="' + cy + '" stroke="#EEE" />' + 
         '<line x1="650" y1="'+cy+'" x2="750" y2="' + cy + '" stroke="#EEE" />' + 
@@ -331,6 +392,11 @@ function stationL(x, y, data, noCircle){
     var cy = y;
     var circle = '<circle cx="'+(cx-150)+'" cy="'+cy+'" r="9"/>' + 
         '<circle cx="'+(cx+150)+'" cy="'+cy+'" r="9"/>';
+    if (noCircle) {
+        circle = '';
+        if(noCircle.left) circle += '<circle cx="'+(cx-150)+'" cy="'+cy+'" r="9"/>'
+        if(noCircle.right) circle += '<circle cx="'+(cx+150)+'" cy="'+cy+'" r="9"/>'
+    }
 	var json = JSON.stringify(data);
 	return '<line x1="50" y1="'+cy+'" x2="100" y2="' + cy + '" stroke="#EEE" />' + 
         '<line x1="300" y1="'+cy+'" x2="350" y2="' + cy + '" stroke="#EEE" />' + 
@@ -343,6 +409,11 @@ function stationR(x, y, data, noCircle){
     var cy = y;
     var circle = '<circle cx="'+(cx-150)+'" cy="'+cy+'" r="9"/>' + 
         '<circle cx="'+(cx+150)+'" cy="'+cy+'" r="9"/>';
+    if (noCircle) {
+        circle = '';
+        if(noCircle.left) circle += '<circle cx="'+(cx-150)+'" cy="'+cy+'" r="9"/>'
+        if(noCircle.right) circle += '<circle cx="'+(cx+150)+'" cy="'+cy+'" r="9"/>'
+    }
 	var json = JSON.stringify(data);
 	return '<line x1="450" y1="'+cy+'" x2="500" y2="' + cy + '" stroke="#EEE" />' + 
         '<line x1="700" y1="'+cy+'" x2="750" y2="' + cy + '" stroke="#EEE" />' + 

@@ -202,8 +202,8 @@ function drawLine1(data) {
     }
     n = 100;
     src += stationR1(600, 4900, data[n]);
-    src += metro_up(450, 4900, data[n].up);
-    src += metro_dn(750, 4900, data[n].down);
+    src += metro_up(500, 4900, data[n].up);
+    src += metro_dn(700, 4900, data[n].down);
     //석수 ~ 병점
     for(var n=48;n<61;n++){
         src += stationR(600, m*n + 200, data[n]);
@@ -212,8 +212,8 @@ function drawLine1(data) {
     }
     n = 101;
     src += stationR1(600, 6300, data[n]);
-    src += metro_up(450, 6300, data[n].up);
-    src += metro_dn(750, 6300, data[n].down);
+    src += metro_up(500, 6300, data[n].up);
+    src += metro_dn(700, 6300, data[n].down);
     //세마 ~ 오산대
     for(var n=61;n<63;n++){
         src += stationR(600, m*n + 300, data[n]);

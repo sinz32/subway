@@ -464,14 +464,19 @@ function drawLine(data, lineId) {
 	return src;
 }
 
-function station(x, y, data){
+function station(x, y, data, color){
+    if (color==undefined) {
+        if (data.stn.endsWith('(미정차)') || data.stn.endsWith('(미개통)') || data.stn.endsWith('(운행 중단)')) color = '#777';
+        else color = '#000';
+    }
+
     var cx = x + 0;
     var cy = y;
     var circle = '<circle cx="'+(cx-350)+'" cy="'+cy+'" r="9"/><circle cx="'+(cx+350)+'" cy="'+cy+'" r="9"/>';
 	var json = JSON.stringify(data);
 	return '<line x1="50" y1="'+cy+'" x2="150" y2="' + cy + '" stroke="#EEE" />' + 
         '<line x1="650" y1="'+cy+'" x2="750" y2="' + cy + '" stroke="#EEE" />' + 
-        '<text class="stn" x='+x+' y='+(y+12)+' fill=#000 onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
+        '<text class="stn" x='+x+' y='+(y+12)+' fill='+color+' onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
         + circle;
 }
 
@@ -695,7 +700,7 @@ const LineList = [{
             "id" : "152"
         }, {
             "name" : "GTX-A",
-            "id" : "190"
+            "id" : "191"
         }
     ]
 }, {

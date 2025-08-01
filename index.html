@@ -157,6 +157,15 @@ function applyData(data, lineId) {
 	else if (lineId == 106) {
 		src = drawLine6(data);
 	}
+	else if (lineId == 121) {
+		src = drawLineGU(data);
+	}
+	else if (lineId == 124) {
+		src = drawLineGC(data);
+	}
+	else if (lineId == 191) {
+		src = drawLineGTXA(data);
+	}
 	else {
 		src = drawLine(data, lineId);
 	}
@@ -354,6 +363,85 @@ function drawLine6(data) {
 	return src;
 }
 
+function drawLineGU(data) {
+	var m = 100;
+	var height = m * data.data.length;
+	var src = '<svg viewbox="0 -50 800 5800" >';
+	src += '<line x1="50" y1="-20" x2="50" y2="5720" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="-20" x2="750" y2="5720" stroke="' + data.color + '" />';
+    src += '<polyline points="50,2200 150,2300 150,2420" fill="none" stroke="'+data.color+'" />';
+    src += '<polyline points="750,2200 650,2300 650,2420" fill="none" stroke="'+data.color+'" />';
+    
+    data = data.data;
+    for(var n=0;n<23;n++){
+        src += station(400, m*n, data[n]);
+        src += metro_up(50, m*n, data[n].up);
+        src += metro_dn(750, m*n, data[n].down);
+    }
+    for(var n=23;n<25;n++){
+        src += stationK(400, m*n, data[n]);
+        src += metro_up(150, m*n, data[n].up);
+        src += metro_dn(650, m*n, data[n].down);
+    }
+    for(var n=25;n<data.length;n++){
+        src += station(400, m*n, data[n]);
+        src += metro_up(50, m*n, data[n].up);
+        src += metro_dn(750, m*n, data[n].down);
+    }
+    
+	src += '</svg>';
+	return src;
+}
+
+function drawLineGC(data) {
+	var m = 100;
+	var height = m * data.data.length;
+	var src = '<svg viewbox="0 -50 800 3200" >';
+	src += '<line x1="50" y1="700" x2="50" y2="3120" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="700" x2="750" y2="3120" stroke="' + data.color + '" />';
+	src += '<line x1="50" y1="-20" x2="50" y2="700" stroke="#77C4A3" />';
+	src += '<line x1="750" y1="-20" x2="750" y2="700" stroke="#77C4A3" />';
+    src += '<polyline points="50,900 150,1000 150,1020" fill="none" stroke="'+data.color+'" />';
+    src += '<polyline points="750,900 650,1000 650,1020" fill="none" stroke="'+data.color+'" />';
+    
+    data = data.data;
+    for(var n=0;n<10;n++){
+        src += station(400, m*n, data[n]);
+        src += metro_up(50, m*n, data[n].up);
+        src += metro_dn(750, m*n, data[n].down);
+    }
+    src += stationK(400, m*n, data[31]);
+    src += metro_up(150, m*n, data[31].up);
+    src += metro_dn(650, m*n, data[31].down);
+    for(var n=10;n<data.length - 1;n++){
+        src += station(400, m*n + 100, data[n]);
+        src += metro_up(50, m*n + 100, data[n].up);
+        src += metro_dn(750, m*n + 100, data[n].down);
+    }
+    
+	src += '</svg>';
+	return src;
+}
+
+function drawLineGTXA(data) {
+	var m = 100;
+	var height = m * data.data.length;
+	var src = '<svg viewbox="0 -50 800 ' + height + '" >';
+	src += '<line x1="50" y1="-20" x2="50" y2="500" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="-20" x2="750" y2="500" stroke="' + data.color + '" />';
+	src += '<line x1="50" y1="700" x2="50" y2="' + (height-80) + '" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="700" x2="750" y2="' + (height-80) + '" stroke="' + data.color + '" />';
+    
+    data.data.forEach((e, i) => {
+		src += station(400, m*i, e);
+		src += metro_up(50, m*i, e.up);
+		src += metro_dn(750, m*i, e.down);
+	});
+    
+	src += '</svg>';
+	return src;
+}
+
 function drawLine(data, lineId) {
 	var m = 100;
 	var height = m * data.data.length;
@@ -451,6 +539,17 @@ function stationR2(x, y, data){
         + circle;
 }
 
+function stationK(x, y, data, noCircle){
+    var cx = x + 0;
+    var cy = y;
+    var circle = '<circle cx="'+(cx-250)+'" cy="'+cy+'" r="9"/>' + 
+        '<circle cx="'+(cx+250)+'" cy="'+cy+'" r="9"/>';
+	var json = JSON.stringify(data);
+	return '<line x1="150" y1="'+cy+'" x2="300" y2="' + cy + '" stroke="#EEE" />' + 
+        '<line x1="500" y1="'+cy+'" x2="650" y2="' + cy + '" stroke="#EEE" />' + 
+        '<text class="stn" x='+x+' y='+(y+12)+' fill=#000 onclick=\'showTrainInfo('+json+');\'>'+data.stn+'</text>'
+        + circle;
+}
 
 function metro_up(x, y, data){
 if(data.length == 0) return '';

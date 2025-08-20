@@ -570,10 +570,7 @@ if (data.length > 1) {
 if (e.sts == '출발' || e.sts == '통과') py -= 30;
 if (e.sts == '접근' || e.sts == '진입') py += 30;
 var f = '';
-if (e.type > 0) f = '_e';
-if (e.name=='ITX-청춘') f = '_itx';
-if (e.name=='SRT') f = '_srt';
-if (e.name == '회송' || e.name == '화물' || e.name == '시운전') f = '_r';
+if (e.type != null) f = '_rapid';
 var file = "'./images/up" + f + ".svg'";
 result += "<image xlink:href=" + file + " x='" + px + "' y='" + py + "' width='28px'/>";
 });
@@ -604,10 +601,7 @@ if (data.length > 1) {
 if (e.sts == '출발' || e.sts == '통과') py += 30;
 if (e.sts == '접근' || e.sts == '진입') py -= 30;
 var f = '';
-if (e.type > 0) f = '_e';
-if (e.name=='ITX-청춘') f = '_itx';
-if (e.name=='SRT') f = '_srt';
-if (e.name == '회송' || e.name == '화물' || e.name == '시운전') f = '_r';
+if (e.type != null) f = '_rapid';
 var file = "'./images/down" + f + ".svg'";
 result += "<image xlink:href=" + file + " x='" + px + "' y='" + py + "' width='28px'/>";
 });

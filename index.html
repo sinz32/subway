@@ -157,6 +157,9 @@ function applyData(data, lineId) {
 	else if (lineId == 106) {
 		src = drawLine6(data);
 	}
+	else if (lineId == 109) {
+		src = drawLine9(data);
+	}
 	else if (lineId == 121) {
 		src = drawLineGU(data);
 	}
@@ -341,7 +344,6 @@ function drawLine6(data) {
 	var src = '<svg viewbox="0 -80 800 3730" >';
     src += '<polyline points="50,3620 50,-30 90,-70 710,-70 750,-30 750,3620" fill="none" stroke="'+data.color+'" />';
 
-
     data = data.data;
     src += stationR(600, 100, data[0], {right: true});
     src += metro_up(750, 100, data[0].down);
@@ -359,6 +361,22 @@ function drawLine6(data) {
         src += metro_up(750, m*(n-2), data[n].up);
         src += metro_dn(50, m*(n-2), data[n].down);
     }
+	src += '</svg>';
+	return src;
+}
+
+function drawLine9(data, lineId) {
+	var m = 100;
+	var height = m * data.data.length;
+	var src = '<svg viewbox="0 -50 800 ' + height + '" >';
+	src += '<line x1="50" y1="-20" x2="50" y2="' + (height-80) + '" stroke="' + data.color + '" />';
+	src += '<line x1="750" y1="-20" x2="750" y2="' + (height-80) + '" stroke="' + data.color + '" />';
+    var express = ['김포공항', '마곡나루', '가양', '염창', '당산', '여의도', '노량진', '동작', '고속터미널', '신논현', '선정릉', '봉은사', '종합운동장', '석촌', '올림픽공원', '중앙보훈병원'];
+    data.data.forEach((e, i) => {
+		src += station(400, m*i, e, express.includes(e.stn)?'#FF1744':null);
+		src += metro_up(750, m*i, e.up);
+		src += metro_dn(50, m*i, e.down);
+	});
 	src += '</svg>';
 	return src;
 }
@@ -448,7 +466,7 @@ function drawLine(data, lineId) {
 	var src = '<svg viewbox="0 -50 800 ' + height + '" >';
 	src += '<line x1="50" y1="-20" x2="50" y2="' + (height-80) + '" stroke="' + data.color + '" />';
 	src += '<line x1="750" y1="-20" x2="750" y2="' + (height-80) + '" stroke="' + data.color + '" />';
-    if ([102, 103, 107, 108, 109, 125, 126, 127, 130, 131, 151, 152,
+    if ([103, 107, 108, 125, 126, 127, 130, 131, 151, 152,
             201, 202, 203, 204, 301, 401, 402, 403, 501].includes(lineId)) data.data.forEach((e, i) => {
 		src += station(400, m*i, e);
 		src += metro_up(750, m*i, e.up);

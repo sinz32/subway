@@ -83,10 +83,12 @@ circle {
     stroke: #000;
     stroke-width: 2;
 }
+text {
+    font-family: NanumBarunGothic;
+}
 text.stn {
     text-anchor: middle;
 	font-size: 36px;
-    font-family: NanumBarunGothic;
 }
 
 div.footer {
@@ -390,6 +392,8 @@ function drawLineGU(data) {
     src += '<polyline points="50,2200 150,2300 150,2420" fill="none" stroke="'+data.color+'" />';
     src += '<polyline points="750,2200 650,2300 650,2420" fill="none" stroke="'+data.color+'" />';
     
+    src += text(400, 50, '(도라산행 열차 1달에 1왕복 운행)', 24, "#424242", 'middle');
+
     data = data.data;
     for(var n=0;n<23;n++){
         src += station(400, m*n, data[n]);
@@ -634,6 +638,13 @@ if (e.sts == '접근' || e.sts == '진입') py -= 30;
 // result += '<text class=terminal x='+(px+8)+' y='+(py+28)+' transform="rotate(90,' + (px + 8) + ',' + (py + 28) + ')" fill=#E0E0E0>'+terminal(e.terminal, e.display)+'</text>';
 });
 return result;
+}
+
+function text(x, y, txt, size, color, align) {
+if(color==undefined) color = '#000';
+var css = 'font-size: '+size+'px;';
+if (align) css += ' text-anchor: ' + align + ';'
+return '<text class=line_name x=' + x + ' y=' + y + ' fill='+color+' style="' + css + '">'+txt+'</text>';
 }
 
 

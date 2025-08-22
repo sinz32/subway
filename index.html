@@ -426,6 +426,8 @@ function drawLineGC(data) {
     src += '<polyline points="50,1100 150,1000 150,980" fill="none" stroke="'+data.color+'" />';
     src += '<polyline points="750,1100 650,1000 650,980" fill="none" stroke="'+data.color+'" />';
     
+    src += text(400, 650, '(ITX-청춘만 경의·중앙선 직결운행)', 24, "#77C4A3", 'middle');
+
     data = data.data;
     for(var n=0;n<10;n++){
         src += station(400, m*n, data[n]);

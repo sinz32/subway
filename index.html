@@ -51,10 +51,10 @@ div.drawer {
 	font-size: 1.1rem;
 }
 div.drawer > div {
-	padding-top: 54px;
+	padding-top: 60px;
 }
 div.menu {
-	padding: 4px;
+	padding: 8px;
 }
 div.submenu {
 	padding: 0px 12px;
@@ -598,6 +598,7 @@ if (e.sts == '출발' || e.sts == '통과') py -= 30;
 if (e.sts == '접근' || e.sts == '진입') py += 30;
 var f = '';
 if (e.type != null) f = '_rapid';
+if (e.type == 'ITX-청춘') f = '_itx';
 var file = "'./images/up" + f + ".svg'";
 result += "<image xlink:href=" + file + " x='" + px + "' y='" + py + "' width='28px'/>";
 });
@@ -629,6 +630,7 @@ if (e.sts == '출발' || e.sts == '통과') py += 30;
 if (e.sts == '접근' || e.sts == '진입') py -= 30;
 var f = '';
 if (e.type != null) f = '_rapid';
+if (e.type == 'ITX-청춘') f = '_itx';
 var file = "'./images/down" + f + ".svg'";
 result += "<image xlink:href=" + file + " x='" + px + "' y='" + py + "' width='28px'/>";
 });

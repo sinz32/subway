@@ -58,6 +58,7 @@ div.menu {
 }
 div.submenu {
 	padding: 0px 12px;
+    display: none;
 }
 div.menu_item {
 	padding: 4px;
@@ -814,6 +815,13 @@ function closeDrawer() {
 	document.getElementById("drawer").style.width = "0";
 	isOpened = false;
 }
+
+function expandMenu(e) {
+    e = e.parentElement.children[1];
+    if (e.style.display == 'block') e.style.display = 'none';
+    else e.style.display = 'block';
+}
+
 </script>
 </body>
 

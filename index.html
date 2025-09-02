@@ -91,6 +91,11 @@ text.stn {
     text-anchor: middle;
 	font-size: 36px;
 }
+text.terminal {
+    text-anchor: middle;
+	font-size: 18px;
+    font-family: NanumBarunGothic;
+}
 
 div.footer {
 	padding: 8px;
@@ -610,7 +615,7 @@ if (data.length > 1) {
 }
 if (e.sts == '출발' || e.sts == '통과') py -= 30;
 if (e.sts == '접근' || e.sts == '진입') py += 30;
-// result += '<text class=terminal x='+(px+8)+' y='+(py+28)+' transform="rotate(90,' + (px + 8) + ',' + (py + 28) + ')" fill=#E0E0E0>'+terminal(e.terminal, e.display)+'</text>';
+result += terminal(e, px, py, 3);
 });
 return result;
 }
@@ -642,7 +647,7 @@ if (data.length > 1) {
 }
 if (e.sts == '출발' || e.sts == '통과') py += 30;
 if (e.sts == '접근' || e.sts == '진입') py -= 30;
-// result += '<text class=terminal x='+(px+8)+' y='+(py+28)+' transform="rotate(90,' + (px + 8) + ',' + (py + 28) + ')" fill=#E0E0E0>'+terminal(e.terminal, e.display)+'</text>';
+result += terminal(e, px, py, 1);
 });
 return result;
 }
@@ -652,6 +657,30 @@ if(color==undefined) color = '#000';
 var css = 'font-size: '+size+'px;';
 if (align) css += ' text-anchor: ' + align + ';'
 return '<text class=line_name x=' + x + ' y=' + y + ' fill='+color+' style="' + css + '">'+txt+'</text>';
+}
+
+function terminal(e, x, y, dy) {
+if (e.terminal == null) return '';
+var terminal = e.terminal;
+if (e.terminal.includes('(')) terminal = e.terminal.split('(')[0].trim();
+x += 14;
+y += 30 + dy;
+
+if (terminal == '내선순환') terminal = '내선';
+else if (terminal == '외선순환') terminal = '외선';
+else if (terminal.length > 3) terminal = e.terminal.slice(0, 2) + '︙';
+switch(terminal.length) {
+    case 1:
+        return '<text class=terminal x='+x+' y='+y+' fill=#E0E0E0>'+terminal+'</text>';
+    case 2:
+        return '<text class=terminal x='+x+' y='+(y-9)+' fill=#E0E0E0>'+terminal[0]+'</text>'
+            + '<text class=terminal x='+x+' y='+(y+9)+' fill=#E0E0E0>'+terminal[1]+'</text>';
+    case 3:
+        return '<text class=terminal x='+x+' y='+(y-17)+' fill=#E0E0E0>'+terminal[0]+'</text>'
+            + '<text class=terminal x='+x+' y='+y+' fill=#E0E0E0>'+terminal[1]+'</text>'
+            + '<text class=terminal x='+x+' y='+(y+17)+' fill=#E0E0E0>'+terminal[2]+'</text>';
+}
+return '';
 }
 
 

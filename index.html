@@ -134,6 +134,15 @@ div.footer {
 	</div>
 	
 	<script>
+
+const update = {
+    tick: -1,
+    lineId: null
+};
+const block = {
+    tick: -1
+};
+
 function loadData(lineId) {
     var mid = 'sinz'; //크롤러들이 백엔드 요청 주소를 찾지 못하도록 하는 뻘짓
     var end = 'me';
@@ -148,6 +157,8 @@ function loadData(lineId) {
 
 function applyData(data, lineId) {
 	document.getElementById('title_text').innerHTML = data.name + ' 열차 위치 (' + (data.isTimeTable?'시간표':'실시간') + ')';
+    update.tick = 20;
+    update.lineId = lineId;
 	var src;
     if (!isNaN(Number(lineId))) lineId = Number(lineId);
 	if (lineId == 101) {
@@ -856,6 +867,15 @@ function expandMenu(e) {
     else e.style.display = 'block';
 }
 
+setInterval(()=>{
+    if (update.tick > 0) update.tick--;
+    if (update.tick == 0) {
+        update.tick = 20;
+        loadData(update.lineId);
+    }
+
+
+}, 1000);
 </script>
 </body>
 

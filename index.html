@@ -304,7 +304,7 @@ function drawLine2(data) {
 
 function drawLine4(data) {
 	var m = 100;
-	var height = m * data.data.length + 1;
+	var height = m * (data.data.length + 1);
 	var src = '<svg viewbox="0 -50 800 ' + height + '" >';
     src += '<polyline points="50,-20 50,2830 750,2970 750,' + (height-80) + '" fill="none" stroke="'+data.color+'" />';
     src += '<polyline points="750,-20 750,2830 50,2970 50,' + (height-80) + '" fill="none" stroke="'+data.color+'" />';

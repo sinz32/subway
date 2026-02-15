@@ -143,7 +143,7 @@ const block = {
     tick: -1
 };
 
-function loadData(lineId) {
+function loadData(lineId, fromApp) {
     var mid = 'sinz'; //크롤러들이 백엔드 요청 주소를 찾지 못하도록 하는 뻘짓
     var end = 'me';
     var url = 'htt'+'ps://' + 'api.' + mid + '.' + end;
@@ -157,6 +157,7 @@ function loadData(lineId) {
 
 function applyData(data, lineId) {
 	document.getElementById('title_text').innerHTML = data.name + ' 열차 위치 (' + (data.isTimeTable?'시간표':'실시간') + ')';
+    if (window.SinZ) SinZ.changeTitle(data.name + ' (' + (data.isTimeTable?'시간표':'실시간') + ')');
     update.tick = 20;
     update.lineId = lineId;
 	var src;
@@ -188,6 +189,12 @@ function applyData(data, lineId) {
 	else if (lineId == 191) {
 		src = drawLineGTXA(data);
 	}
+	// else if (lineId == 'M') {
+	// 	src = drawLineTMm(data);
+	// }
+	// else if (lineId == 'E') {
+	// 	src = drawLineTMe(data);
+	// }
 	else {
 		src = drawLine(data, lineId);
 	}
@@ -484,6 +491,76 @@ function drawLineGTXA(data) {
 	src += '</svg>';
 	return src;
 }
+
+function drawLineTMm(data) {
+    var m = 100;
+    var height = m * data.length;
+    var src = '<svg viewbox="0 -50 800 ' + height + '" >';
+    src += '<line x1="50" y1="-20" x2="50" y2="' + (height-80) + '" stroke="' + data.color + '" />';
+    src += '<line x1="750" y1="-20" x2="750" y2="' + (height-80) + '" stroke="' + data.color + '" />';
+    src += '<polyline points="100,480 100,750 50,800" fill="none" stroke="'+data.color+'" />';
+    src += '<polyline points="700,480 700,750 750,800" fill="none" stroke="'+data.color+'" />';
+    
+    data = data.data;
+    for(var n=0;n<5;n++){
+        src += station(400, m*n, data[n]);
+        src += metro_up(50, m*n, data[n].up);
+        src += metro_dn(750, m*n, data[n].down);
+    }
+    for(var n=5;n<25;n++){
+        src += station(400, m*(n+3), data[n]);
+        src += metro_up(50, m*(n+3), data[n].up);
+        src += metro_dn(750, m*(n+3), data[n].down);
+    }
+    
+    var size = data.length - 1;
+    for(var n=size;n>=25;n--){
+        // src += stationI(400, m*(size-n+5), data[n], false, null, false, true);
+        src += metro_up(100, m*(size-n+5), data[n].up);
+        src += metro_dn(700, m*(size-n+5), data[n].down);
+    }
+    src += '</svg>';
+    return src;
+}
+
+function drawLineTMe(data) {
+    var m = 100;
+    var height = m * data.length;
+    var src = '<svg viewbox="0 -50 800 2820" >';
+    src += '<polyline points="50,-20 50,2650 150,2750 650,2750 750,2650 750,1300 650,1200 150,1200 100,1150" fill="none" stroke="'+data.color+'" />';
+    src += '<polyline points="750,-20 750,950 700,1000 150,1000 100,1050 100,2650 150,2700 650,2700 700,2650 700,1300 650,1250 200,1250 100,1250 50,1200 50,1150" fill="none" stroke="'+data.color+'" />';
+    src += '<line x1="50" y1="1070" x2="100" y2="1130" stroke="' + data.color + '" />';
+    src += '<line x1="100" y1="1070" x2="50" y2="1130" stroke="' + data.color + '" />';
+    
+    data = data.data;
+    var py = data.length - 1;
+    for(var n=29;n<data.length;n++){
+        src += station(400, m*(py - n), data[n]);
+        src += metro_up(50, m*(py - n), data[n].down);
+        src += metro_dn(750, m*(py - n), data[n].up);
+    }
+    
+    src += stationL(200, 1100, data[0]);
+    src += metro_up(50, 1100, data[0].down);
+    src += metro_dn(100, 1100, data[0].up);
+
+    py = data.length + 1;
+    for(var n=14;n<28;n++){
+        src += stationL(200, m*(py - n), data[n], false, '#000000', true);
+        src += metro_dn(100, m*(py - n), data[n].up);
+        src += metro_up(50, m*(py - n), data[n].down);
+    }
+    py = 13;
+    for(var n=1;n<14;n++){
+        src += stationR(600, m*(n + py), data[n], true, '#000000', true);
+        src += metro_up(700, m*(n + py), data[n].up, true);
+        src += metro_dn(750, m*(n + py), data[n].down, true);
+    }
+    
+    src += '</svg>';
+    return src;
+}
+
 
 function drawLine(data, lineId) {
 	var m = 100;
@@ -816,7 +893,7 @@ const LineList = [{
         }
     ]
 }, {
-    "name" : "도쿄 지하철",
+    "name" : "도쿄 지하철 & 교통국",
     "child" : true,
     "data": [
         {
@@ -858,10 +935,21 @@ const LineList = [{
         }, {
             "name" : "후쿠토신선",
             "id" : "F"
+        }, {
+            "name" : "아라카와선 (도쿄 사쿠라 트램)",
+            "id" : "SA"
+        }, {
+            "name" : "닛포리·토네리 라이너",
+            "id" : "NT"
         }
     ]
 }];
 (function(){
+if (window.SinZ) {
+    SinZ.createDrawer(JSON.stringify(LineList));
+    document.querySelector("div.title").style.display = 'none';
+    document.querySelector('div.body_outer').style.marginTop = '0px';
+}
 var src = '<div>';
 LineList.forEach((e, i) => {
 	src += '<div class=\'menu\'>';
@@ -910,8 +998,6 @@ setInterval(()=>{
         update.tick = 20;
         loadData(update.lineId);
     }
-
-
 }, 1000);
 </script>
 </body>

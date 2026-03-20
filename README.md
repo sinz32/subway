@@ -1,5 +1,5 @@
 # 실시간 지하철 위치 (대한민국)
-© 2018-2025 SinZ, All rights reserved.
+© 2018-2026 SinZ, All rights reserved.
 
 - 몇 년 전에 만들고 유지보수 하던 것 리펙토링
 - `Back-End`는 소스 공개 계획 없음
